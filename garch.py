@@ -14,6 +14,13 @@ import arch
 import pandas as pd
 import numpy as np
 import os
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import PolynomialFeatures
 
 class GARCHModel:
     def __init__(self, data_file, loaded_model = None):
@@ -24,10 +31,10 @@ class GARCHModel:
         self.best_q = None
 
     def load_data(self):
-        max_data = 100
+        # max_data = 100
         # Load the CSV file into a DataFrame
         self.data = pd.read_csv(self.data_file)
-        self.data = self.data[:max_data]
+        # self.data = self.data[:max_data]
 
     def preprocess_data(self):
         # Extract the log returns data
@@ -84,7 +91,8 @@ class GARCHModel:
             model_fit = self.model.fit(disp = "off")
             pred = model_fit.forecast(horizon = 1)
             rolling_predictions.append((i, np.sqrt(pred.variance.values[-1][0])))
-            print(i)
+            print("data")
+            print(np.sqrt(pred.variance.values[-1][0]))
         self.rolling_predictions = pd.DataFrame(rolling_predictions, columns=['Index', 'Predicted_Variance'])
 
     def visualization(self):
@@ -112,8 +120,8 @@ class GARCHModel:
         new_row = pd.DataFrame({'middle_price': [new_mid_price], 'log_returns': [new_log_return]})
         self.data = pd.concat([self.data, new_row], ignore_index=True)
 
-        # Store the updated DataFrame to CSV
-        self.data.to_csv(self.data_file, index=False)
+        # # Store the updated DataFrame to CSV
+        # self.data.to_csv(self.data_file, index=False)
 
         # Re-fit the model with updated data if necessary
         if not self.model:
@@ -128,8 +136,6 @@ class GARCHModel:
         predicted_variance = np.sqrt(pred.variance.values[-1][0])
 
         return predicted_variance
-
-
 
 #creating model and testing
 def create_new_model(data_file):
@@ -146,4 +152,76 @@ def load_pretrained_model(data_file, model_file):
 
 data_file = 'datasets/coinbase_quotes_2023-01-01_BTC-USDT.csv'
 testmodel = create_new_model(data_file)
-print(testmodel.update_and_predict(30000))
+
+# Mock GARCH model prediction function
+def predict_volatility(model, new_mid_prices):
+    """
+    Predict volatility based on new mid prices using a GARCH model.
+
+    Parameters:
+    model (GARCHModel): The GARCH model instance that can forecast volatility.
+    new_mid_prices (np.array or list): Array or list of new mid prices to predict volatility for.
+
+    Returns:
+    np.array: Predicted volatility for the given mid prices.
+    """
+    predicted_volatilities = []
+    for price in new_mid_prices:
+        # Update the model with the new mid price and predict the next variance
+        predicted_variance = model.update_and_predict(price)
+        # We use the square root of the variance to get the standard deviation (volatility)
+        predicted_volatility = np.sqrt(predicted_variance)
+        predicted_volatilities.append(predicted_volatility)
+
+    return np.array(predicted_volatilities)
+
+# Load your dataset
+df = pd.read_csv(data_file)
+
+# Convert timestamps to datetime format and set as index
+df['timestamp'] = pd.to_datetime(df['timestamp'], unit='us')
+df.set_index('timestamp', inplace=True)
+
+# Calculate mid-price and spread
+df['mid_price'] = (df['ask_price'] + df['bid_price']) / 2
+df['spread'] = df['ask_price'] - df['bid_price']
+
+df.dropna(subset=['mid_price'], inplace=True)  # Drop rows with NaN in 'mid_price'
+
+# Calculate predicted volatility using the mock GARCH model
+df['predicted_volatility'] = predict_volatility(testmodel, df['mid_price'])
+
+# Drop NaN values
+df_clean = df.dropna()
+
+# Assuming df_clean and the model training and testing have been conducted
+if not df_clean.empty:
+    X = df_clean[['predicted_volatility']]
+    y = df_clean['spread']
+
+    # Splitting the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+    # Linear Regression Model (for predicting spread)
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    predictions = model.predict(X_test)
+
+    # Evaluating the model
+    mse = mean_squared_error(y_test, predictions)
+    print(f'Mean Squared Error: {mse}')
+    print(f'Coefficients: {model.coef_}')
+    print(f'Intercept: {model.intercept_}')
+
+    # Visualization of actual spread vs predicted spread
+    plt.figure(figsize=(12, 6))
+    plt.scatter(y_test.index, y_test, color='blue', label='Actual Spread', alpha=0.6)
+    plt.scatter(y_test.index, predictions, color='red', label='Predicted Spread', alpha=0.6)  # Changed from plt.plot to plt.scatter
+    plt.title('Comparison of Actual and Predicted Spread')
+    plt.xlabel('Index')
+    plt.ylabel('Spread')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+else:
+    print("Not enough data after processing for model training and evaluation.")
