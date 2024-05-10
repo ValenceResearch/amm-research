@@ -8,7 +8,7 @@ def main(from_date, to_date):
         from_date=from_date,
         to_date=to_date,
         symbols=["BTC-USDT", "ETH-USDT"],
-        api_key="TD.EGbmz1ZjK48X8Umz.xA3stUptkohr9Bs.kkKNJo2yL78bZVP.YJRJl3xrqDmyvJE.ymLsIiFZJ-tTtLx.s2Xh",
+        api_key="TD.DV-W-SYHUhTufUsm.EN4btEiFDy9wZ9Y.2osoo9EgGWo6zqr.6-uNQiQoOf6FbaV.7cnPAozw0wnmqwY.O40t"
     )
 
 if __name__ == "__main__":
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Use command-line arguments if provided, else use default values
-    from_date = args.from_date if args.from_date else "2023-11-01"
-    to_date = args.to_date if args.to_date else "2023-11-02"
+    from_date = args.from_date
+    to_date = args.to_date
 
     main(from_date, to_date)

@@ -1,25 +1,24 @@
 from collections import deque
 from decimal import Decimal
 from typing import List
+import os
 import pickle
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
 from dojo.actions import BaseAction
 from dojo.agents import BaseAgent
 from dojo.environments.uniswapV3 import UniV3Obs, UniV3Trade
 from dojo.policies import BasePolicy
+
 from scipy.stats import shapiro
 import arch
-import pandas as pd
-import numpy as np
-import os
-import pandas as pd
-import numpy as np
+
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import PolynomialFeatures
 
 class GARCHModel:
