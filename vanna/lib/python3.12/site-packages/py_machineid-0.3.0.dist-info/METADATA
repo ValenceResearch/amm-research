@@ -1,0 +1,57 @@
+Metadata-Version: 2.1
+Name: py-machineid
+Version: 0.3.0
+Summary: Get the unique machine ID of any host (without admin privileges)
+Home-page: https://github.com/keygen-sh/py-machineid
+Author: Zeke Gabrielse
+Author-email: oss@keygen.sh
+License: MIT
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: winregistry
+
+# py-machineid
+
+Get the unique machine ID of any host (without admin privileges).
+
+Sponsored by:
+
+[![Keygen logo](https://user-images.githubusercontent.com/6979737/175406169-bd8bf064-7343-4bd1-94b7-a773ecec07b8.png)](https://keygen.sh)
+
+_A software licensing and distribution API built for developers._
+
+## Install
+
+Install using [`pip`](https://docs.python.org/3/installing/index.html):
+
+```bash
+python3 -m pip install py-machineid
+```
+
+## Usage
+
+To obtain the raw GUID of the device, use `id() -> str`:
+
+```python
+import machineid
+
+print(machineid.id())
+```
+
+To obtain an anonymized (hashed) version of the GUID, see below. The
+`hashed_id(str) -> str` function takes an optional application ID,
+which will ensure a unique ID per-app for the same device.
+
+```python
+import machineid
+
+print(machineid.hashed_id('myappid'))
+print(machineid.hashed_id())
+```
+
+## Thanks
+
+Special thanks to Denis Brodbeck for his Go package, [`machineid`](https://github.com/denisbrodbeck/machineid).
