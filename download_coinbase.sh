@@ -38,3 +38,8 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Data download completed successfully."
+
+# Unzip .gz files
+find $DATASET_DIR -name '*.gz' -exec gunzip {} \;
+
+echo "All .gz files have been unzipped successfully."
